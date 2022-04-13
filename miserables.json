@@ -1,0 +1,11 @@
+{
+    "nodes": [
+      {"id": "Bon Iver"},
+      {"id": "Kanye West"},
+      {"id": "James Blake"}
+    ],
+    "links": [
+      {"source": "Bon Iver", "target": "Kanye West"},
+      {"source": "Bon Iver", "target": "James Blake"}
+    ]
+  }
