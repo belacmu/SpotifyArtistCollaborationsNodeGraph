@@ -21,9 +21,9 @@
       // Random tree
       const initData = {
         nodes: [
-            {"id": "Bon Iver", "group": 1},
-            {"id": "Kanye West", "group": 2},
-            {"id": "James Blake", "group": 3}
+            {"id": "Bon Iver", "genre": "Alternative", "size": 1},
+            {"id": "Kanye West", "genre": "Rap", "size": 1},
+            {"id": "James Blake", "genre": "Electronic", "size": 1}
         ],
         links: [
             {"source": "Bon Iver", "target": "Kanye West"},
@@ -35,10 +35,22 @@
       (document.getElementById('graph'))
         .graphData(initData)
         .nodeId('id')
-        .nodeAutoColorBy('group')
+        .nodeAutoColorBy('id')
+
+        //Node Click
+        .onNodeClick(node => {
+          searchForArtist(node.id);
+        })
+
+
+
+
+
+        
+// YOU'RE TRYING TO CAHNGE GTHE SIZE FOR EACH INDIVIDUAL NODE
         .nodeCanvasObject((node, ctx, globalScale) => {
           const label = node.id;
-          const fontSize = 12/globalScale;
+          const fontSize = node.size*12/globalScale;
           ctx.font = `${fontSize}px Sans-Serif`;
           const textWidth = ctx.measureText(label).width;
           const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
@@ -59,7 +71,7 @@
           bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
         });
 
-        //    const { nodes, links } = Graph.graphData();
+        
            
     </script>
     <script>

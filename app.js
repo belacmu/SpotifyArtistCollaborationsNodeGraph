@@ -4,19 +4,35 @@ var spotifyApi = new SpotifyWebApi();
 const clientId = 'e95a863a8a7f4244b9e7981c519014aa';
 const clientSecret = 'a96759e036bd4659908aeaa9fe454234';
 
-// Get a token here 
-// https://getyourspotifyrefreshtoken.herokuapp.com/
+
+// Get a token
+const getToken = async () => {
+
+  const result = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+          'Content-Type' : 'application/x-www-form-urlencoded', 
+          'Authorization' : 'Basic ' + btoa(clientId + ':' + clientSecret)
+      },
+      body: 'grant_type=client_credentials'
+  });
+
+  const data = await result.json();
+  console.log(data.access_token)
+  spotifyApi.setAccessToken(data.access_token);
+  return data.access_token;
+}
+getToken();
 
 
-spotifyApi.setAccessToken("BQC7D1ag-6RHqzGI4TncvfkLqvvt8GYbUqkxAQVoLKd376qImwWiSnMWc37AdQB-cjmuThBtLj-4vdIkckujOfCuk82BF88PoCuAp6g92mvkoMAQk92fkw3BoEI61D5JVC7c2sZb-vDn9zU");
 
 
-// Data that gets passed to the node graph. Add to this.
+// This data is a duplicate dataset used to check that we don't make nodes that already exist
 let nodebase = {
   "nodes": [
-    {"id": "Bon Iver"},
-    {"id": "Kanye West"},
-    {"id": "James Blake"}
+    {"id": "Bon Iver", "genre": "Alternative", "size": 1},
+    {"id": "Kanye West", "genre": "Rap", "size": 1},
+    {"id": "James Blake", "genre": "Electronic", "size": 1}
   ],
   "links": [
     {"source": "Bon Iver", "target": "Kanye West"},
@@ -27,11 +43,22 @@ let nodebase = {
 
 
 
-// THE PROBLEM IS THAT I'm sending empty nodes to the database
-// Probably smart to break up the sending of nodes and links again so I don't send empty nodes
 // https://github.com/vasturiano/force-graph/blob/master/example/dynamic/index.html
 
+var artistSearchResultName;
+var artistSearchResultGenre;
 
+// Search and return a single artist, with artist info
+// function returnArtist(searchArtist){
+//   spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=artist&limit=1').then(
+//     function (data) {
+//       //console.log(searchArtist);
+//       artistSearchResultName = data.artists.items[0].name;
+//       artistSearchResultGenre = data.artists.items[0].genres[0];
+//       //console.log("Artist name is "+artistSearchResultName);
+//       console.log(artistSearchResultGenre);
+//     })
+//}
 
   
   function addNodes(inArtist, searchArtist){
@@ -40,17 +67,22 @@ let nodebase = {
       const checkUsername = obj => obj.id === inArtist;
       exists = nodebase.nodes.some(checkUsername)
 
-      // If it's not in the list, add node to nodelist
+      // If it's not in the list, 
       if (exists == false){
-        console.log(inArtist + " not here yet");
-        let outNode = {"id": inArtist, "group": 1}
+        //get artist genre
+        //returnArtist(inArtist);
+
+        //add node to nodelist
+        //console.log(inArtist + " not here yet");
+        //console.log(artistSearchResultGenre);
+        let outNode = {"id": inArtist, "genre": artistSearchResultGenre, "size": 1}
         nodebase.nodes.push(outNode);
         Graph.graphData({
           nodes: [...nodes, outNode],
-          links: [...links]
+          links: [...links],
         });
       } else {
-        console.log(inArtist + " already here");
+        // console.log(inArtist + " already here");
       }
     
   }
@@ -58,8 +90,14 @@ let nodebase = {
   function addLinks(inArtist, searchArtist){
     const { nodes, links } = Graph.graphData();
     if (inArtist != searchArtist){
+      
       let outLink = {"source": searchArtist, "target": inArtist};
-      //console.log(outLink);
+
+      // Increase the size of each node in the link
+      Graph.graphData().nodes.find(x => x.id === inArtist).size +=0.01
+      Graph.graphData().nodes.find(x => x.id === searchArtist).size +=0.01
+      
+      //console.log(result2);
       Graph.graphData({
         nodes: [...nodes],
         links: [...links, outLink]
@@ -69,11 +107,8 @@ let nodebase = {
   }
 
 
-// search tracks whose contains 'feat searchArtist'
 
-
-
-// search tracks whose Artist 'searchArtist'
+// search tracks whose Artist is 'searchArtist'
 function searchForArtist(searchArtist){
   spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
     function (data) {
@@ -95,18 +130,29 @@ function searchForArtist(searchArtist){
     }
   );
 
-  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:feat ' + searchArtist + '&type=track&limit=50').then(
+  // Track has the search artist in the title
+  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:' + searchArtist + '&type=track&limit=50').then(
     function (data) {
       let output = data;
       // console.log('Artist is ' + searchArtist, output.tracks.items);
       for (let track in output.tracks.items){
-        artists = output.tracks.items[track].artists
-        // console.log(artists);
+        // Check first that at least ONE artist is search artist
+        var ok = false;
         for (let artist in data.tracks.items[track].artists){
-          var out = data.tracks.items[track].artists[artist].name;
-          // console.log(out);
-          addNodes(out, searchArtist);
-          addLinks(out, searchArtist);
+          if (output.tracks.items[track].artists[artist].name == searchArtist){
+            ok = true;
+          }
+        }
+        // If the previous test is positive:
+        if (ok == true){
+          artists = output.tracks.items[track].artists
+          //console.log(artists);
+          for (let artist in data.tracks.items[track].artists){
+            var out = data.tracks.items[track].artists[artist].name;
+            // console.log(out);
+            addNodes(out, searchArtist);
+            addLinks(out, searchArtist);
+          }
         }
       }
     },
@@ -138,4 +184,4 @@ function searchForArtist(searchArtist){
 
 // searchForArtist("James Blake");
 // drawGraph();
-// console.log(nodebase)
+console.log(nodebase)
