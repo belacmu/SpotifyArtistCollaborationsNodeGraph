@@ -78,12 +78,13 @@ var artistSearchResultGenre;
         let outNode = {"id": inArtist, "genre": artistSearchResultGenre, "size": 1}
         nodebase.nodes.push(outNode);
         Graph.graphData({
-          nodes: [...nodes, outNode],
+          nodes: [outNode, ...nodes],
           links: [...links],
         });
       } else {
         // console.log(inArtist + " already here");
       }
+      
     
   }
   
@@ -122,6 +123,7 @@ function searchForArtist(searchArtist){
           // console.log(out);
           addNodes(out, searchArtist);
           addLinks(out, searchArtist);
+          Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
         }
       }
     },

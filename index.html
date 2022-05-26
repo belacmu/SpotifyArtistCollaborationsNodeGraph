@@ -18,7 +18,6 @@
     <div id="graph"></div>
   
     <script>
-      // Random tree
       const initData = {
         nodes: [
             {"id": "Bon Iver", "genre": "Alternative", "size": 1},
@@ -30,25 +29,82 @@
             {"source": "Bon Iver", "target": "James Blake"}
         ]
       };
+
+
+      let hoverLink = null;
+      let hoverNode = null;
+      const highlightNodes = new Set();
+      const highlightLinks = new Set();
+      const dimmedNodes = new Set();
+
+      // cross-link node objects
   
       const Graph = ForceGraph()
-      (document.getElementById('graph'))
+      const elem = document.getElementById('graph');
+
+      
+
+      const graph = Graph(elem)
         .graphData(initData)
         .nodeId('id')
         .nodeAutoColorBy('id')
+
+        
+
 
         //Node Click
         .onNodeClick(node => {
           searchForArtist(node.id);
         })
 
+        // Node hover
+        .onNodeHover(node => {
+          hoverNode = node;
 
-
-
-
+          elem.style.cursor = node ? 'pointer' : null;
+          highlightNodes.clear();
+          highlightLinks.clear();
+          dimmedNodes.clear(); 
+          if (node) {
+            console.log(hoverNode.__bckgDimensions);
+            Graph.graphData().links.forEach(link => {
+              if (link.source == hoverNode){
+                highlightNodes.add(link.target);
+              }else{
+                dimmedNodes.add(link.target);
+              }
+              if (link.target == hoverNode){
+                highlightNodes.add(link.source);
+              }else{
+                dimmedNodes.add(link.source);
+              }
+            });
+          } 
+        })
+        /* .onLinkHover(link => {
+          hoverLink = link;
+          highlightNodes.clear();
+          highlightLinks.clear();
+          dimmedNodes.clear();
+          if (link){
+            highlightNodes.add(link.target);
+            highlightNodes.add(link.source);
+            Graph.graphData().nodes.forEach(node => {
+              dimmedNodes.add(node);
+            });
+            dimmedNodes.delete(link.target);
+            dimmedNodes.delete(link.source);
+          }
+        }) */
         
-// YOU'RE TRYING TO CAHNGE GTHE SIZE FOR EACH INDIVIDUAL NODE
+        .autoPauseRedraw(false)
+
+
         .nodeCanvasObject((node, ctx, globalScale) => {
+          const hovered = node === hoverNode;
+          const highlight = highlightNodes.has(node);
+          const dimmed = dimmedNodes.has(node);
+          
           const label = node.id;
           const fontSize = node.size*12/globalScale;
           ctx.font = `${fontSize}px Sans-Serif`;
@@ -60,18 +116,25 @@
 
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = node.color;
+          ctx.fillStyle = hovered ? 'crimson'
+            : highlight ? 'black'
+            : dimmed ? ('rgba(0, 0, 0, 0.2)')
+            : node.color;
           ctx.fillText(label, node.x, node.y);
+          
 
           node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+          
         })
+
         .nodePointerAreaPaint((node, color, ctx) => {
-          ctx.fillStyle = color;
-          const bckgDimensions = node.__bckgDimensions;
-          bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-        });
+            ctx.fillStyle = color;
+            const bckgDimensions = node.__bckgDimensions;
+            bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+          })
 
         
+        ;
            
     </script>
     <script>
