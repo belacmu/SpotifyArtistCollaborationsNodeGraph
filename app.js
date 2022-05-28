@@ -26,23 +26,6 @@ getToken();
 
 
 
-
-// This data is a duplicate dataset used to check that we don't make nodes that already exist
-let nodebase = {
-  "nodes": [
-    {"id": "Bon Iver", "genre": "Alternative", "size": 1},
-    {"id": "Kanye West", "genre": "Rap", "size": 1},
-    {"id": "James Blake", "genre": "Electronic", "size": 1}
-  ],
-  "links": [
-    {"source": "Bon Iver", "target": "Kanye West"},
-    {"source": "Bon Iver", "target": "James Blake"}
-  ]
-};
-
-
-
-
 // https://github.com/vasturiano/force-graph/blob/master/example/dynamic/index.html
 
 var artistSearchResultName;
@@ -65,7 +48,7 @@ var artistSearchResultGenre;
     const { nodes, links } = Graph.graphData();
       // Check if the artist is already in node list
       const checkUsername = obj => obj.id === inArtist;
-      exists = nodebase.nodes.some(checkUsername)
+      exists = Graph.graphData().nodes.some(checkUsername)
 
       // If it's not in the list, 
       if (exists == false){
@@ -76,7 +59,6 @@ var artistSearchResultGenre;
         //console.log(inArtist + " not here yet");
         //console.log(artistSearchResultGenre);
         let outNode = {"id": inArtist, "genre": artistSearchResultGenre, "size": 1}
-        nodebase.nodes.push(outNode);
         Graph.graphData({
           nodes: [outNode, ...nodes],
           links: [...links],
@@ -112,7 +94,7 @@ var artistSearchResultGenre;
 
 function searchForArtist(searchArtist){
   // search tracks whose Artist is 'searchArtist'
-  /* spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
+  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
     function (data) {
       let output = data;
       // console.log('Artist is ' + searchArtist, output.tracks.items);
@@ -130,7 +112,7 @@ function searchForArtist(searchArtist){
     function (err) {
       console.error(err);
     }
-  ); */
+  );
 
   // Track has the search artist in the title
   spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:' + searchArtist + '&type=track&limit=50').then(
@@ -182,10 +164,3 @@ function searchForArtist(searchArtist){
 
 
 
-
-
-
-
-// searchForArtist("James Blake");
-// drawGraph();
-console.log(nodebase)

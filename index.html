@@ -22,10 +22,16 @@
         nodes: [
             {"id": "Bon Iver", "genre": "Alternative", "size": 1},
             {"id": "Kanye West", "genre": "Rap", "size": 1},
+            {"id": "Rihanna", "genre": "", "size": 1},
+            {"id": "Coldplay", "genre": "", "size": 1},
+            {"id": "Swedish House Mafia", "genre": "", "size": 1},
             {"id": "James Blake", "genre": "Electronic", "size": 1}
         ],
         links: [
             {"source": "Bon Iver", "target": "Kanye West"},
+            {"source": "Rihanna", "target": "Kanye West"},
+            {"source": "Rihanna", "target": "Coldplay"},
+            {"source": "Swedish House Mafia", "target": "Coldplay"},
             {"source": "Bon Iver", "target": "James Blake"}
         ]
       };
