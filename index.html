@@ -66,7 +66,7 @@
           highlightLinks.clear();
           dimmedNodes.clear(); 
           if (node) {
-            console.log(hoverNode.__bckgDimensions);
+            console.log(hoverNode);
             Graph.graphData().links.forEach(link => {
               if (link.source == hoverNode){
                 highlightNodes.add(link.target);
@@ -79,6 +79,7 @@
                 dimmedNodes.add(link.source);
               }
             });
+              
           } 
         })
         /* .onLinkHover(link => {

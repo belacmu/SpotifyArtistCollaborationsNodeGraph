@@ -109,9 +109,10 @@ var artistSearchResultGenre;
 
 
 
-// search tracks whose Artist is 'searchArtist'
+
 function searchForArtist(searchArtist){
-  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
+  // search tracks whose Artist is 'searchArtist'
+  /* spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
     function (data) {
       let output = data;
       // console.log('Artist is ' + searchArtist, output.tracks.items);
@@ -123,19 +124,19 @@ function searchForArtist(searchArtist){
           // console.log(out);
           addNodes(out, searchArtist);
           addLinks(out, searchArtist);
-          Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
         }
       }
     },
     function (err) {
       console.error(err);
     }
-  );
+  ); */
 
   // Track has the search artist in the title
   spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:' + searchArtist + '&type=track&limit=50').then(
     function (data) {
       let output = data;
+      console.log(output);
       // console.log('Artist is ' + searchArtist, output.tracks.items);
       for (let track in output.tracks.items){
         // Check first that at least ONE artist is search artist
@@ -162,6 +163,7 @@ function searchForArtist(searchArtist){
       console.error(err);
     }
   );
+  Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
 }
 
 
