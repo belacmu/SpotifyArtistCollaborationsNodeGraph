@@ -4,4 +4,4 @@ I made a node graph that shows artists that have worked together. Click on an ar
 
 This was made mostly to play around with data visualization and Spotify's API 
 
-https://belacmu.github.io/SpotifyAPITest-v2/
+https://belacmu.github.io/SpotifyArtistCollaborationsNodeGraph/
