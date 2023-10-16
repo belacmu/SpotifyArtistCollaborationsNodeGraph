@@ -134,4 +134,11 @@ document.getElementById('btn1').addEventListener('click', function() {
     var search = document.getElementById("textInput").value;
     console.log(search);
     searchForArtist(search);
-  });
+    });
+    document.getElementById('textInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            var search = document.getElementById("textInput").value;
+            console.log(search);
+            searchForArtist(search);
+        }
+    });
