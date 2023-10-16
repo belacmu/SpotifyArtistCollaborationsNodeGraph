@@ -93,12 +93,15 @@ var artistSearchResultGenre;
 
 
 function searchForArtist(searchArtist){
+
   // Based on the searchArtist, look to see if we already have that node in the graphData
-  const searchArtistNode = Graph.graphData().nodes.find(node => node.id === searchArtist);
-  // If we do, and the node's searched property is marked as true, skip the following, otherwise, continue
-  if (searchArtistNode.searched != true){
+  var searchArtistNode = Graph.graphData().nodes.find(node => node.id === searchArtist);
+
+  // If we do, and the node's searched property exists, skip the following, otherwise, continue
+  if (searchArtistNode === undefined || !searchArtistNode.hasOwnProperty('searched')){
+
     // Mark this searchedArtist's 'searched' property as true, so that we can skip it if the user tries to search it again
-    searchArtistNode.searched = true;
+
     // search tracks whose Artist is 'searchArtist'
     spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
       function (data) {
@@ -113,6 +116,8 @@ function searchForArtist(searchArtist){
             addNodes(out, searchArtist);
             addLinks(out, searchArtist);
           }
+          searchArtistNode = Graph.graphData().nodes.find(node => node.id === searchArtist);
+          searchArtistNode.searched = true;
         }
       },
       function (err) {
@@ -153,6 +158,11 @@ function searchForArtist(searchArtist){
     );
     Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
   }
+  else(searchArtistNode => {
+    // Center/zoom on node
+    Graph.centerAt(searchArtistNode.x, searchArtistNode.y, 1000);
+    Graph.zoom(8, 2000);
+  });
 }
 
 
