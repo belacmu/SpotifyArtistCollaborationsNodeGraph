@@ -93,45 +93,20 @@ var artistSearchResultGenre;
 
 
 function searchForArtist(searchArtist){
-  // search tracks whose Artist is 'searchArtist'
-  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
-    function (data) {
-      let output = data;
-      // console.log('Artist is ' + searchArtist, output.tracks.items);
-      for (let track in output.tracks.items){
-        artists = output.tracks.items[track].artists
-        // console.log(artists);
-        for (let artist in data.tracks.items[track].artists){
-          var out = data.tracks.items[track].artists[artist].name;
-          // console.log(out);
-          addNodes(out, searchArtist);
-          addLinks(out, searchArtist);
-        }
-      }
-    },
-    function (err) {
-      console.error(err);
-    }
-  );
-
-  // Track has the search artist in the title
-  spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:' + searchArtist + '&type=track&limit=50').then(
-    function (data) {
-      let output = data;
-      console.log(output);
-      // console.log('Artist is ' + searchArtist, output.tracks.items);
-      for (let track in output.tracks.items){
-        // Check first that at least ONE artist is search artist
-        var ok = false;
-        for (let artist in data.tracks.items[track].artists){
-          if (output.tracks.items[track].artists[artist].name == searchArtist){
-            ok = true;
-          }
-        }
-        // If the previous test is positive:
-        if (ok == true){
+  // Based on the searchArtist, look to see if we already have that node in the graphData
+  const searchArtistNode = Graph.graphData().nodes.find(node => node.id === searchArtist);
+  // If we do, and the node's searched property is marked as true, skip the following, otherwise, continue
+  if (searchArtistNode.searched != true){
+    // Mark this searchedArtist's 'searched' property as true, so that we can skip it if the user tries to search it again
+    searchArtistNode.searched = true;
+    // search tracks whose Artist is 'searchArtist'
+    spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=artist:' + searchArtist + '&type=track&limit=50').then(
+      function (data) {
+        let output = data;
+        // console.log('Artist is ' + searchArtist, output.tracks.items);
+        for (let track in output.tracks.items){
           artists = output.tracks.items[track].artists
-          //console.log(artists);
+          // console.log(artists);
           for (let artist in data.tracks.items[track].artists){
             var out = data.tracks.items[track].artists[artist].name;
             // console.log(out);
@@ -139,13 +114,45 @@ function searchForArtist(searchArtist){
             addLinks(out, searchArtist);
           }
         }
+      },
+      function (err) {
+        console.error(err);
       }
-    },
-    function (err) {
-      console.error(err);
-    }
-  );
-  Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
+    );
+
+    // Track has the search artist in the title
+    spotifyApi.getGeneric('https://api.spotify.com/v1/search?q=track:' + searchArtist + '&type=track&limit=50').then(
+      function (data) {
+        let output = data;
+        console.log(output);
+        // console.log('Artist is ' + searchArtist, output.tracks.items);
+        for (let track in output.tracks.items){
+          // Check first that at least ONE artist is search artist
+          var ok = false;
+          for (let artist in data.tracks.items[track].artists){
+            if (output.tracks.items[track].artists[artist].name == searchArtist){
+              ok = true;
+            }
+          }
+          // If the previous test is positive:
+          if (ok == true){
+            artists = output.tracks.items[track].artists
+            //console.log(artists);
+            for (let artist in data.tracks.items[track].artists){
+              var out = data.tracks.items[track].artists[artist].name;
+              // console.log(out);
+              addNodes(out, searchArtist);
+              addLinks(out, searchArtist);
+            }
+          }
+        }
+      },
+      function (err) {
+        console.error(err);
+      }
+    );
+    Graph.graphData().nodes.sort((a, b) => (a.size > b.size) ? 1 : -1);
+  }
 }
 
 
